@@ -6,7 +6,7 @@ interface Message {
   content: string;
 }
 
-export function useYouTubeManager() {
+export function useYouTubeManager(projectName: string | null) {
   const [videoUrl, setVideoUrl] = useState("");
   const [videos, setVideos] = useState<{ title: string; videoId: string }[]>([]);
   const [query, setQuery] = useState("");
@@ -15,25 +15,27 @@ export function useYouTubeManager() {
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    const storedVideos = localStorage.getItem("youtubeVideos");
-    if (storedVideos) {
-      setVideos(JSON.parse(storedVideos));
+    if (projectName) {
+      const storedVideos = localStorage.getItem(`videos-${projectName}`);
+      if (storedVideos) {
+        setVideos(JSON.parse(storedVideos));
+      }
     }
-  }, []);
+  }, [projectName]);
 
   const handleEnterVideo = async () => {
-    if (!videoUrl) return;
+    if (!videoUrl || !projectName) return;
     setIsLoading(true);
 
     try {
-      const res = await axios.post("/api/get-transcript", { videoUrl });
+      const res = await axios.post("/api/get-transcript", { videoUrl, projectName });
       const { transcript, videoId, videoTitle } = res.data;
 
-      await axios.post("/api/store-transcript", { transcript, videoId, videoTitle });
+      await axios.post("/api/store-transcript", { transcript, videoId, videoTitle, projectName });
 
       const newVideo = { title: videoTitle, videoId };
       setVideos((prev) => [...prev, newVideo]);
-      localStorage.setItem("youtubeVideos", JSON.stringify([...videos, newVideo]));
+      localStorage.setItem(`videos-${projectName}`, JSON.stringify([...videos, newVideo]));
 
       setVideoUrl("");
       setIndexingMessage("Video indexed successfully!");
@@ -46,12 +48,12 @@ export function useYouTubeManager() {
   };
 
   const handleQuery = async () => {
-    if (!query) return;
+    if (!query || !projectName) return;
     setIsLoading(true);
 
     try {
       setMessages((prev) => [...prev, { role: "user", content: query }]);
-      const res = await axios.post("/api/query", { query });
+      const res = await axios.post("/api/query", { query, projectName });
       const aiResponse =
         typeof res.data.response === "string" ? res.data.response : "AI Response Error: Unexpected data format.";
       setMessages((prev) => [...prev, { role: "ai", content: aiResponse }]);
@@ -64,18 +66,19 @@ export function useYouTubeManager() {
     }
   };
 
-  const handleClearVideos = async () => {
-    const confirmClear = window.confirm("Are you sure you want to delete all indexed videos?");
-    if (!confirmClear) return;
+  const handleResetVectorDB = async () => {
+    if (!projectName) return;
+
+    const confirmReset = window.confirm("Are you sure you want to reset the AI knowledge base for this project?");
+    if (!confirmReset) return;
 
     try {
-      await axios.post("/api/reset-vector-db");
-      localStorage.removeItem("youtubeVideos");
-      setVideos([]);
-      setIndexingMessage("All previous videos have been cleared.");
+      await axios.post("/api/reset-vector-db", { projectName });
+
+      setIndexingMessage("AI knowledge base has been reset.");
     } catch (error) {
-      console.error(" Error clearing videos:", error);
-      setIndexingMessage("Failed to clear videos. Try again.");
+      console.error("❌ Error resetting vector database:", error);
+      setIndexingMessage("Failed to reset AI knowledge base. Try again.");
     }
   };
 
@@ -92,6 +95,6 @@ export function useYouTubeManager() {
     isLoading,
     handleEnterVideo,
     handleQuery,
-    handleClearVideos,
+    handleResetVectorDB,
   };
 }
