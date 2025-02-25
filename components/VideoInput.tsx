@@ -6,11 +6,10 @@ interface Props {
   videoUrl: string;
   setVideoUrl: (url: string) => void;
   handleEnterVideo: () => void;
-  handleClearVideos: () => void;
   isLoading: boolean;
 }
 
-export default function VideoInput({ videoUrl, setVideoUrl, handleEnterVideo, handleClearVideos, isLoading }: Props) {
+export default function VideoInput({ videoUrl, setVideoUrl, handleEnterVideo, isLoading }: Props) {
   return (
     <div className="space-y-4 mb-6">
       <div className="flex space-x-2">
