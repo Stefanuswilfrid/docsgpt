@@ -12,8 +12,7 @@ export async function POST(request: NextRequest) {
 
     const index = pinecone.Index(process.env.PINECONE_INDEX_NAME!);
 
-    // ✅ Delete all embeddings associated with the current project
-    await index.deleteAll({ filter: { projectName } });
+    await index.deleteAll();
 
     return NextResponse.json({ status: 200, message: "AI knowledge base reset successfully!" });
   } catch (error) {

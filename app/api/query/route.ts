@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
       vector: queryVector[0],
       topK: 3,
       includeMetadata: true,
-      filter: { projectName }, // ✅ Filter to only retrieve current project's data
+      filter: { projectName }, 
     });
 
     const context = results.matches
@@ -28,7 +28,6 @@ export async function POST(request: NextRequest) {
 
     const openai = new ChatOpenAI({ openAIApiKey: process.env.OPENAI_API_KEY });
 
-    // ✅ **Better Prompt for Gen Z, Friendly AI**
     const response = await openai.call([
       {
         role: "system",
@@ -45,7 +44,6 @@ export async function POST(request: NextRequest) {
       },
     ]);
     
-    // ✅ Convert AI response to string
     const formattedResponse = response.toString();
     console.log(response)
     
