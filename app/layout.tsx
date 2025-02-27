@@ -24,10 +24,18 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+<head>
+<link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=satoshi@700,500,400&display=swap" />
+
+</head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        <div className="min-h-dvh">
+          <main className="max-w-[960px] mx-auto px-4 md:px-8 pt-12 pb-6">
+            {children}
+          </main>
+        </div>
       </body>
     </html>
   );
