@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState, useEffect } from "react";
 import clsx from "clsx";
 import { LucideFile, LucideTrash2 } from "lucide-react";
@@ -22,7 +23,7 @@ export default function FileInputPDF({
 }) {
   const pdfjs = usePDFJS();
   const [files, setFiles] = useState<PDFFile[]>([]);
-  const [queue, setQueue] = useState<PDFFile[]>([]); // Queue for processing
+  const [queue, setQueue] = useState<PDFFile[]>([]); 
   const [isExtracting, setIsExtracting] = useState<boolean>(false);
 
   useEffect(() => {
@@ -154,7 +155,6 @@ export default function FileInputPDF({
                   </a>
                   <p className="text-xs text-gray-500">{file.size}</p>
                   {file.isExtracting && <p className="text-xs text-gray-400">{file.stage || "Extracting..."}</p>}
-                  {/* {!file.isExtracting && file.text && <p className="text-xs text-gray-600 truncate">{file.text.substring(0, 100)}...</p>} */}
                 </div>
               </div>
               <button

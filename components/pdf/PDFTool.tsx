@@ -1,9 +1,9 @@
 import React from "react";
-import { Layout } from "./Layout";
+import { Layout } from "../Layout";
 import { cn } from "@/lib/utils";
 import FileInputPDF from "./FileInputPDF";
 import FileConverterPDF from "./FileConverterPDF";
-import AiPage from "./ChatBox";
+import AiPage from "../ChatBox";
 
 export default function PDFTool() {
   const [pdfBlobUrl, setPdfBlobUrl] = React.useState<string | null>(null);

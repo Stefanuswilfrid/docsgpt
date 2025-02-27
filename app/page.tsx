@@ -6,9 +6,10 @@ import VideoInput from "@/components/VideoInput";
 import VideoList from "@/components/VideoList";
 import ChatBox from "@/components/ChatBox";
 import { useYouTubeManager } from "@/hooks/useYoutubeManager";
-import CreateProject from "@/components/CreateProject";
+import CreateProject from "@/components/project/CreateProject";
 import { Layout } from "@/components/Layout";
-import PDFTool from "@/components/PDFTool";
+import PDFTool from "@/components/pdf/PDFTool";
+import CreateProjectModal from "@/components/project/CreateProjectModal";
 
 export default function YouTubeComponents() {
   const [projectName, setProjectName] = useState<string | null>(null);
@@ -24,6 +25,7 @@ export default function YouTubeComponents() {
 
   return (
     <Layout>
+      <CreateProjectModal/>
       <div className="max-md:px-4">
         <PDFTool/>
         
