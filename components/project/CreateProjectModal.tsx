@@ -5,7 +5,7 @@ import { ProjectDialog } from "./ProjectDialog";
 import useProjectStore from "@/store/useProjectStore";
 
 const CreateProjectModal = () => {
-  const { projectName, setProjectName } = useProjectStore(); 
+  const { setProjectName } = useProjectStore(); 
 
   const [tempProjectName, setTempProjectName] = useState("");
   const [open, setOpen] = useState(false);

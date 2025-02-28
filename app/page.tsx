@@ -2,9 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import VideoInput from "@/components/VideoInput";
-import VideoList from "@/components/VideoList";
-import ChatBox from "@/components/ChatBox";
+
 import { useYouTubeManager } from "@/hooks/useYoutubeManager";
 import CreateProject from "@/components/project/CreateProject";
 import { Layout } from "@/components/Layout";

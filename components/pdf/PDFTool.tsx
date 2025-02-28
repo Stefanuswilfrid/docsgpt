@@ -3,9 +3,12 @@ import { Layout } from "../Layout";
 import { cn } from "@/lib/utils";
 import FileInputPDF from "./FileInputPDF";
 import FileConverterPDF from "./FileConverterPDF";
-import AiPage from "../ChatBox";
+import useProjectStore from "@/store/useProjectStore";
+import AiPage from "../ai/ChatBox";
 
 export default function PDFTool() {
+  const { projectName } = useProjectStore(); 
+
   const [pdfBlobUrl, setPdfBlobUrl] = React.useState<string | null>(null);
   const [loadingState, setLoadingState] = React.useState({
     loading: false,
@@ -15,11 +18,12 @@ export default function PDFTool() {
     <Layout>
       <div className="mt-4 px-2 md:px-4">
         <h1 className="text-2xl md:text-3xl font-bold">Chat with PDF</h1>
-        <p className="mt-1 text-gray-400">Upload your PDF </p>
+        <p className="mt-1 text-gray-400">Project Name : {projectName} </p>
       </div>
       <div className="mt-4">
         <div className="mt-3 grid md:grid-cols-2 gap-4 md:min-h-[calc(100dvh-320px)]">
           <FileInputPDF
+            projectName={projectName}
             disabled={loadingState.loading}
             onChange={(url) => {
               setPdfBlobUrl(url);

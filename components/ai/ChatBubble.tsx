@@ -54,49 +54,7 @@ const ChatBubble = ({ role, content, timestamp }: { role: string; content: strin
 
           {role === "system" && content !== "Unauthorized" && (
             <div className={"flex item gap-2 mt-2 " + (audioPlaying ? "opacity-50 cursor-not-allowed" : "")}>
-              
-              <div className="flex items-center gap-1">
-                <div
-                  className={
-                    "h-4 w-1 rounded-full bg-neutral-200  " + (audioPlaying ? "animate-shrink-in-height-fast" : "")
-                  }
-                />
-                <div
-                  className={
-                    "h-4 w-1 rounded-full bg-neutral-200  " + (audioPlaying ? "animate-shrink-in-height-slow" : "")
-                  }
-                />
-                <div
-                  className={
-                    "h-4 w-1 rounded-full bg-neutral-200  " + (audioPlaying ? "animate-shrink-in-height-fast" : "")
-                  }
-                />
-                <div
-                  className={
-                    "h-4 w-1 rounded-full bg-neutral-200  " + (audioPlaying ? "animate-shrink-in-height-medium" : "")
-                  }
-                />
-                <div
-                  className={
-                    "h-4 w-1 rounded-full bg-neutral-200  " + (audioPlaying ? "animate-shrink-in-height-slow" : "")
-                  }
-                />
-                <div
-                  className={
-                    "h-4 w-1 rounded-full bg-neutral-200 " + (audioPlaying ? "animate-shrink-in-height-fast" : "")
-                  }
-                />
-                <div
-                  className={
-                    "h-4 w-1 rounded-full bg-neutral-200  " + (audioPlaying ? "animate-shrink-in-height-medium" : "")
-                  }
-                />
-                <div
-                  className={
-                    "h-4 w-1 rounded-full bg-neutral-200  " + (audioPlaying ? "animate-shrink-in-height-fast" : "")
-                  }
-                />
-              </div>
+
             </div>
           )}
 

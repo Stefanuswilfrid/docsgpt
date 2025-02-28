@@ -1,9 +1,9 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState, useEffect } from "react";
 import clsx from "clsx";
 import { LucideFile, LucideTrash2 } from "lucide-react";
 import { usePDFJS } from "@/hooks/usePdfjs";
 import { createWorker } from "tesseract.js";
+import axios from "axios";
 
 interface PDFFile {
   name: string;
@@ -12,14 +12,17 @@ interface PDFFile {
   isExtracting: boolean;
   text: string;
   stage: string;
+
 }
 
 export default function FileInputPDF({
   onChange,
   disabled = false,
+  projectName,
 }: {
   onChange: (texts: string[]) => void;
   disabled?: boolean;
+  projectName: string;
 }) {
   const pdfjs = usePDFJS();
   const [files, setFiles] = useState<PDFFile[]>([]);
@@ -89,6 +92,8 @@ export default function FileInputPDF({
   
     setIsExtracting(false);
     setQueue((prev) => prev.slice(1)); // Remove from queue
+    await storePDFTranscript(extractedText, file.name);
+
     onChange(files.map((f) => (f.blobUrl === file.blobUrl ? extractedText : f.text)));
   }
 
@@ -99,7 +104,21 @@ export default function FileInputPDF({
     }
   }
 
-  function handleFileUpload(event: React.ChangeEvent<HTMLInputElement>) {
+  async function storePDFTranscript(transcript: string, pdfFileName: string) {
+    try {
+      const response = await axios.post("/api/upload", {
+        transcript,
+        pdfFileName,
+        projectName, 
+      });
+  
+      console.log("PDF transcript stored successfully:", response.data.message);
+    } catch (error) {
+      console.error("Error storing PDF transcript:", error );
+    }
+  }
+
+   function handleFileUpload(event: React.ChangeEvent<HTMLInputElement>) {
     const selectedFiles = Array.from(event.target.files || []);
     const newFiles: PDFFile[] = selectedFiles.map((file) => ({
       name: file.name,
@@ -126,9 +145,10 @@ export default function FileInputPDF({
 
   return (
     <div className={clsx("rounded-md border border-black/40 border-dashed w-full p-4", disabled && "opacity-50")}>
+      
       <label
         htmlFor="file-upload"
-        className={clsx("relative block w-full h-40 flex flex-col items-center justify-center cursor-pointer", disabled && "pointer-events-none")}
+        className={clsx("relative  w-full h-40 flex flex-col place-items-center justify-center cursor-pointer", disabled && "pointer-events-none")}
       >
         <LucideFile className="w-10 h-10 text-gray-400" />
         <p className="text-gray-500">Drag and drop files here or <span className="font-medium text-sky-500">click here</span> to upload</p>
