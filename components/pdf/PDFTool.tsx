@@ -2,12 +2,11 @@ import React from "react";
 import { Layout } from "../Layout";
 import { cn } from "@/lib/utils";
 import FileInputPDF from "./FileInputPDF";
-import FileConverterPDF from "./FileConverterPDF";
 import useProjectStore from "@/store/useProjectStore";
-import AiPage from "../ai/ChatBox";
+import ChatUI from "../ai/ChatBox";
 
 export default function PDFTool() {
-  const { projectName } = useProjectStore(); 
+  const { projectName } = useProjectStore();
 
   const [pdfBlobUrl, setPdfBlobUrl] = React.useState<string | null>(null);
   const [loadingState, setLoadingState] = React.useState({
@@ -16,9 +15,21 @@ export default function PDFTool() {
   });
   return (
     <Layout>
-      <div className="mt-4 px-2 md:px-4">
-        <h1 className="text-2xl md:text-3xl font-bold">Chat with PDF</h1>
-        <p className="mt-1 text-gray-400">Project Name : {projectName} </p>
+      <div className="mt-4 px-2 md:px-4 flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl md:text-3xl font-bold">Chat with PDF</h1>
+          <p className="mt-1 text-gray-400">Project Name : {projectName} </p>
+        </div>
+
+        <div>
+          <button
+            onClick={()=>{}}
+            type="submit"
+            className="block bg-zinc-100 rounded-md font-medium duration-200 bg-hovered active:bg-subtle px-4 py-2"
+          >
+            Create a New Project
+          </button>{" "}
+        </div>
       </div>
       <div className="mt-4">
         <div className="mt-3 grid md:grid-cols-2 gap-4 md:min-h-[calc(100dvh-320px)]">
@@ -35,7 +46,7 @@ export default function PDFTool() {
                 <div
                   className={cn(loadingState.loading && "opacity-50", "h-full")}
                 >
-                  <AiPage/>
+                  <ChatUI />
                 </div>
               </div>
               {loadingState.loading && (

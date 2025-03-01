@@ -3,6 +3,7 @@ import React, { useCallback, useRef, useState, useEffect } from "react";
 import ChatBubble from "./ChatBubble";
 import axios from "axios";
 import useProjectStore from "@/store/useProjectStore";
+import ReactMarkdown from "react-markdown";
 
 interface Message {
   role: string;
@@ -10,18 +11,33 @@ interface Message {
   timestamp: string;
 }
 
-const decoder = new TextDecoder();
-
-export default function AiPage() {
+export default function ChatUI() {
   const chatInput = useRef<HTMLInputElement>(null);
   const [generatedText, setGeneratedText] = useState<string[]>([]);
   const chatWrapper = useRef<HTMLDivElement>(null);
 
   const [loading, setLoading] = useState<boolean>(false);
   const [messages, setMessages] = useState<Message[]>([]);
+  const [pdf, setPdf] = useState<string | null>(null); // To store the PDF (base64 string)
 
   const [query, setQuery] = useState<string>("");  // To store the user query
-  const { projectName } = useProjectStore(); 
+  const { projectName } = useProjectStore();
+
+  // Load messages and PDF from localStorage on component mount
+  useEffect(() => {
+    if (projectName) {
+      const storedMessages = localStorage.getItem(`${projectName}-messages`);
+      const storedPDF = localStorage.getItem(`${projectName}-pdf`);
+
+      if (storedMessages) {
+        setMessages(JSON.parse(storedMessages));
+      }
+
+      if (storedPDF) {
+        setPdf(storedPDF);
+      }
+    }
+  }, [projectName]);
 
   const sendToAI = useCallback(async () => {
     const input = chatInput.current!.value;
@@ -29,10 +45,14 @@ export default function AiPage() {
     setLoading(true);
 
     chatInput.current!.value = "";
-    setMessages([
-      ...messages,
-      { role: "user", content: input, timestamp: new Date().toISOString() },
-    ]);
+    const newMessage = { role: "user", content: input, timestamp: new Date().toISOString() };
+    setMessages((prevMessages) => {
+      const updatedMessages = [...prevMessages, newMessage];
+      if (projectName) {
+        localStorage.setItem(`${projectName}-messages`, JSON.stringify(updatedMessages)); // Save messages to localStorage
+      }
+      return updatedMessages;
+    });
 
     try {
       const response = await axios.post("/api/send", {
@@ -42,14 +62,16 @@ export default function AiPage() {
 
       const aiMessage = response.data.response;  // Assuming 'response' is the AI's reply
 
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: "system",
-          content: aiMessage,
-          timestamp: new Date().toISOString(),
-        },
-      ]);
+      setMessages((prevMessages) => {
+        const updatedMessages = [
+          ...prevMessages,
+          { role: "system", content: aiMessage, timestamp: new Date().toISOString() },
+        ];
+        if (projectName) {
+          localStorage.setItem(`${projectName}-messages`, JSON.stringify(updatedMessages)); // Save messages to localStorage
+        }
+        return updatedMessages;
+      });
     } catch (error) {
       console.error("Error fetching data from server.", error);
     }
@@ -63,6 +85,8 @@ export default function AiPage() {
       chatWrapper.current.scrollTop = chatWrapper.current.scrollHeight;
     }
   }, [messages]);
+
+
 
   return (
     <section className="w-full h-full flex-col items-center justify-between px-8 pt-12 pb-0">
@@ -86,28 +110,44 @@ export default function AiPage() {
           }`}
         />
       </form>
+
+
       <div
-        className="w-full mb-8 md:-mt-24 md:pb-72 lg:pb-24 pb-72 overflow-y-auto max-h-[70vh]" // Set max-height and overflow-y for scroll
+        className="w-full mb-8 md:-mt-24 md:pb-72 lg:pb-24 pb-72 overflow-y-auto max-h-[70vh] scrollbar-thin scrollbar-thumb-gray-400"
         ref={chatWrapper}
       >
         {messages.map((message, index) => (
           <ChatBubble
             key={index}
             role={message.role}
-            content={message.content}
+            content={
+              message.role === "user" ? (
+                message.content
+              ) : (
+                <ReactMarkdown
+                  components={{
+                    p: ({ node, ...props }) => <div {...props} />,
+                  }}
+                >
+                  {message.content}
+                </ReactMarkdown>
+              )
+            }
             timestamp={message.timestamp}
           />
         ))}
-        {loading && 
+        {loading && (
           <ChatBubble
             key={messages.length}
             role="system"
-            content={generatedText.map((text) => text).join("") === ""
+            content={
+              generatedText.map((text) => text).join("") === ""
                 ? "..."
-                : generatedText.map((text) => text).join("")}
+                : generatedText.map((text) => text).join("")
+            }
             timestamp={new Date().toISOString()}
           />
-        }
+        )}
       </div>
     </section>
   );

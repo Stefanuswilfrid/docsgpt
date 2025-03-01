@@ -5,14 +5,19 @@ import { pinecone } from "@/lib/pineconeClient";
 export async function POST(request: NextRequest) {
   try {
     const { query, projectName } = await request.json();
-    
+
     if (!query || !projectName) {
-      return NextResponse.json({ error: "Query and projectName are required" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Query and projectName are required" },
+        { status: 400 }
+      );
     }
 
     console.log(`🔍 Searching for: ${query} in project: ${projectName}`);
 
-    const embeddings = new OpenAIEmbeddings({ openAIApiKey: process.env.OPENAI_API_KEY });
+    const embeddings = new OpenAIEmbeddings({
+      openAIApiKey: process.env.OPENAI_API_KEY,
+    });
     const queryVector = await embeddings.embedDocuments([query]);
 
     const index = pinecone.Index(process.env.PINECONE_INDEX_NAME!);
@@ -32,7 +37,7 @@ export async function POST(request: NextRequest) {
     const response = await openai.call([
       {
         role: "system",
-        content: `You're a chill, Gen Z-style AI assistant. Keep responses **short**, **casual**, and **friendly**. Be helpful but not robotic. If the question is off-topic, respond with humor while staying helpful.
+        content: `You're a chill, Gen Z-style AI assistant. Keep responses **short**,  **brief**, **to the point** and **friendly**. Be helpful but not robotic. If the question is off-topic, respond with humor while staying helpful.
     
     Context:
     ${context}
@@ -44,13 +49,15 @@ export async function POST(request: NextRequest) {
         content: query,
       },
     ]);
-    
+
     console.log("AI response:", response.content);
-    
+
     return NextResponse.json({ response: response.content });
-    
   } catch (error) {
     console.error("❌ Error querying AI:", error);
-    return NextResponse.json({ error: "Failed to retrieve AI response" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to retrieve AI response" },
+      { status: 500 }
+    );
   }
 }

@@ -12,7 +12,6 @@ interface PDFFile {
   isExtracting: boolean;
   text: string;
   stage: string;
-
 }
 
 export default function FileInputPDF({
@@ -26,8 +25,16 @@ export default function FileInputPDF({
 }) {
   const pdfjs = usePDFJS();
   const [files, setFiles] = useState<PDFFile[]>([]);
-  const [queue, setQueue] = useState<PDFFile[]>([]); 
+  const [queue, setQueue] = useState<PDFFile[]>([]);
   const [isExtracting, setIsExtracting] = useState<boolean>(false);
+
+  // Load files and their corresponding extracted texts from localStorage
+  useEffect(() => {
+    const storedFiles = localStorage.getItem(`${projectName}-files`);
+    if (storedFiles) {
+      setFiles(JSON.parse(storedFiles));
+    }
+  }, [projectName]);
 
   useEffect(() => {
     return () => {
@@ -54,17 +61,17 @@ export default function FileInputPDF({
     setFiles((prev) =>
       prev.map((f) => (f.blobUrl === file.blobUrl ? { ...f, isExtracting: true, stage: "Starting..." } : f))
     );
-  
+
     let extractedText = "";
-  
+
     try {
       if (!pdfjs) return;
-  
+
       const response = await fetch(file.blobUrl);
-      const arrayBuffer = await response.arrayBuffer();  
+      const arrayBuffer = await response.arrayBuffer();
       const pdf = await pdfjs.getDocument({ data: arrayBuffer }).promise;
       const numOfPages = pdf.numPages;
-  
+
       const worker = await createWorker("eng", 1, {
         logger: (m) =>
           setFiles((prev) =>
@@ -72,24 +79,24 @@ export default function FileInputPDF({
           ),
       });
       await worker.setParameters({ preserve_interword_spaces: "1" });
-  
+
       for (let i = 1; i <= numOfPages; i++) {
         const page = await pdf.getPage(i);
         const textContent = await page.getTextContent();
         extractedText += textContent.items.map((item: any) => item.str).join(" ") + "\n";
       }
-      console.log("extracted",extractedText)
-  
+      console.log("extracted", extractedText);
+
       await worker.terminate();
     } catch (error) {
       console.error("Error extracting text:", error);
       extractedText = "Failed to extract text.";
     }
-  
+
     setFiles((prev) =>
       prev.map((f) => (f.blobUrl === file.blobUrl ? { ...f, isExtracting: false, text: extractedText, stage: "" } : f))
     );
-  
+
     setIsExtracting(false);
     setQueue((prev) => prev.slice(1)); // Remove from queue
     await storePDFTranscript(extractedText, file.name);
@@ -97,7 +104,6 @@ export default function FileInputPDF({
     onChange(files.map((f) => (f.blobUrl === file.blobUrl ? extractedText : f.text)));
   }
 
-  
   function processNextFile() {
     if (queue.length > 0) {
       extractTextFromPDF(queue[0]);
@@ -109,16 +115,16 @@ export default function FileInputPDF({
       const response = await axios.post("/api/upload", {
         transcript,
         pdfFileName,
-        projectName, 
+        projectName,
       });
-  
+
       console.log("PDF transcript stored successfully:", response.data.message);
     } catch (error) {
-      console.error("Error storing PDF transcript:", error );
+      console.error("Error storing PDF transcript:", error);
     }
   }
 
-   function handleFileUpload(event: React.ChangeEvent<HTMLInputElement>) {
+  function handleFileUpload(event: React.ChangeEvent<HTMLInputElement>) {
     const selectedFiles = Array.from(event.target.files || []);
     const newFiles: PDFFile[] = selectedFiles.map((file) => ({
       name: file.name,
@@ -129,7 +135,14 @@ export default function FileInputPDF({
       stage: "",
     }));
 
-    setFiles((prev) => [...prev, ...newFiles]);
+    // Update state and store files in localStorage
+    setFiles((prev) => {
+      const updatedFiles = [...prev, ...newFiles];
+      if (projectName) {
+        localStorage.setItem(`${projectName}-files`, JSON.stringify(updatedFiles)); // Save files in localStorage
+      }
+      return updatedFiles;
+    });
     setQueue((prev) => [...prev, ...newFiles]);
 
     if (!isExtracting) {
@@ -141,17 +154,24 @@ export default function FileInputPDF({
     setFiles((prev) => prev.filter((file) => file.blobUrl !== blobUrl));
     setQueue((prev) => prev.filter((file) => file.blobUrl !== blobUrl));
     onChange(files.filter((file) => file.blobUrl !== blobUrl).map((file) => file.text));
+
+    // Update localStorage after removing a file
+    if (projectName) {
+      const updatedFiles = files.filter((file) => file.blobUrl !== blobUrl);
+      localStorage.setItem(`${projectName}-files`, JSON.stringify(updatedFiles));
+    }
   }
 
   return (
     <div className={clsx("rounded-md border border-black/40 border-dashed w-full p-4", disabled && "opacity-50")}>
-      
       <label
         htmlFor="file-upload"
-        className={clsx("relative  w-full h-40 flex flex-col place-items-center justify-center cursor-pointer", disabled && "pointer-events-none")}
+        className={clsx("relative w-full h-40 flex flex-col place-items-center justify-center cursor-pointer", disabled && "pointer-events-none")}
       >
         <LucideFile className="w-10 h-10 text-gray-400" />
-        <p className="text-gray-500">Drag and drop files here or <span className="font-medium text-sky-500">click here</span> to upload</p>
+        <p className="text-gray-500">
+          Drag and drop files here or <span className="font-medium text-sky-500">click here</span> to upload
+        </p>
         <input
           id="file-upload"
           type="file"
