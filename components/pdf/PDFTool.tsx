@@ -36,8 +36,8 @@ export default function PDFTool() {
           <FileInputPDF
             projectName={projectName}
             disabled={loadingState.loading}
-            onChange={(url) => {
-              setPdfBlobUrl(url);
+            onChange={(urls) => {
+              setPdfBlobUrl(urls[0] || null);
             }}
           />
           <div className="max-md:mt-6 gap-4 md:flex md:flex-col">
