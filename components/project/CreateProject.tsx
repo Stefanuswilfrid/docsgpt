@@ -42,7 +42,7 @@ const CreateProject = ({ setProjectName }: { setProjectName: (name: string) => v
     } else {
       setOpen(true);
     }
-  }, []);
+  }, [setProjectName]);
 
   return (
     <AlertDialog open={open}>

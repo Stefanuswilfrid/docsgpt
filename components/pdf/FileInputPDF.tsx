@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState, useEffect } from "react";
 import clsx from "clsx";
 import { LucideFile, LucideTrash2 } from "lucide-react";

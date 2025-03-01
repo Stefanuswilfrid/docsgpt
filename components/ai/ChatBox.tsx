@@ -77,7 +77,7 @@ export default function ChatUI() {
     }
     setGeneratedText([]);
     setLoading(false);
-  }, [messages, setMessages, setGeneratedText, projectName]);
+  }, [setMessages, setGeneratedText, projectName]);
 
   // Scroll to the bottom when messages change
   useEffect(() => {
