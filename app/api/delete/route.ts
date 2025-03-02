@@ -11,7 +11,8 @@ export async function POST(req: Request) {
 
     const index = pinecone.index(process.env.PINECONE_INDEX_NAME!);
 
-    const vectorId = `project-${projectName}-file-${pdfFileName}`;
+    const vectorId = `project-${projectName}-pdf-${pdfFileName}`;
+    console.log(vectorId)
     await index.deleteOne(vectorId );
 
     return NextResponse.json({ message: `File ${pdfFileName} deleted from Pinecone successfully` });
