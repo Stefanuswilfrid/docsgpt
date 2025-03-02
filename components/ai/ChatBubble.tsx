@@ -1,5 +1,5 @@
 import React from "react";
-import ReactMarkdown from "react-markdown"; // Import ReactMarkdown
+import ReactMarkdown from "react-markdown"; 
 
 const ChatBubble = ({
   role,
@@ -10,7 +10,6 @@ const ChatBubble = ({
   content: string | React.JSX.Element;
   timestamp: string;
 }) => {
-  // Format the time for display
   const formatTimestamp = (timestamp: string) => {
     return new Date(timestamp).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
   };

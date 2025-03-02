@@ -5,6 +5,7 @@ import { LucideFile, LucideTrash2 } from "lucide-react";
 import { usePDFJS } from "@/hooks/usePdfjs";
 import { createWorker } from "tesseract.js";
 import axios from "axios";
+import { createSuccessToast } from "../Toast";
 
 interface PDFFile {
   name: string;
@@ -29,7 +30,6 @@ export default function FileInputPDF({
   const [queue, setQueue] = useState<PDFFile[]>([]);
   const [isExtracting, setIsExtracting] = useState<boolean>(false);
 
-  // Load files and their corresponding extracted texts from localStorage
   useEffect(() => {
     const storedFiles = localStorage.getItem(`${projectName}-files`);
     if (storedFiles) {
@@ -99,7 +99,7 @@ export default function FileInputPDF({
     );
 
     setIsExtracting(false);
-    setQueue((prev) => prev.slice(1)); // Remove from queue
+    setQueue((prev) => prev.slice(1)); 
     await storePDFTranscript(extractedText, file.name);
 
     onChange(files.map((f) => (f.blobUrl === file.blobUrl ? extractedText : f.text)));
@@ -136,7 +136,6 @@ export default function FileInputPDF({
       stage: "",
     }));
 
-    // Update state and store files in localStorage
     setFiles((prev) => {
       const updatedFiles = [...prev, ...newFiles];
       if (projectName) {
@@ -152,14 +151,33 @@ export default function FileInputPDF({
   }
 
   function removeFile(blobUrl: string) {
+    createSuccessToast("File successfully deleted", {
+      id: "delete-file-success",
+    });
     setFiles((prev) => prev.filter((file) => file.blobUrl !== blobUrl));
     setQueue((prev) => prev.filter((file) => file.blobUrl !== blobUrl));
     onChange(files.filter((file) => file.blobUrl !== blobUrl).map((file) => file.text));
 
-    // Update localStorage after removing a file
     if (projectName) {
       const updatedFiles = files.filter((file) => file.blobUrl !== blobUrl);
       localStorage.setItem(`${projectName}-files`, JSON.stringify(updatedFiles));
+
+      const fileToDelete = files.find((file) => file.blobUrl === blobUrl);
+      if (fileToDelete) {
+        deleteFromPinecone(fileToDelete.name);
+      }
+    }
+  }
+
+  async function deleteFromPinecone(pdfFileName: string){
+    try {
+      const response = await axios.post("/api/delete",{
+        pdfFileName,
+        projectName
+      })
+      
+    } catch (error) {
+      console.error(error)
     }
   }
 
